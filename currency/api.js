@@ -20,7 +20,14 @@ var self = (module.exports = {
     if (typeof data.date !== 'string') {
       self.sendResponse(res, 403, 'Please provide the date as a string');
       return;
+    }    
+
+    const dateValidator = /^\d{4}[./-]\d{2}[./-]\d{2}$/;
+    if (!data.date.match(dateValidator)){
+      self.sendResponse(res, 400, 'Please provide a valid date in the format: YYYY-MM-DD');
+      return;
     }
+    
     var date = data.date;
 
     // build the API call URL
