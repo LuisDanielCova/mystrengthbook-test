@@ -1,5 +1,5 @@
 var rest = require('restler');
-var apiUrl = 'https://openexchangerates.org/api/historical/';
+var apiUrl = 'https://openexchangerates.org/api/';
 var APP_ID = 'c45dde88452e4c8a8bc8eba812cb8eda';
 
 var self = (module.exports = {
@@ -31,7 +31,7 @@ var self = (module.exports = {
     var date = data.date;
 
     // build the API call URL
-    var url = apiUrl + date + '.json?&symbols=' + symbols + '&app_id=' + APP_ID;
+    var url = apiUrl + "historical/" + date + '.json?&symbols=' + symbols + '&app_id=' + APP_ID;
 
     console.log('Calling OpenExchangeRates API at: ', url);
 
@@ -53,6 +53,32 @@ var self = (module.exports = {
         callback('API Error');
       }
     });
+  },
+
+  // Method to get all the currencies supported by OpenExchangeRates
+  getCurrencies: (res) => {
+    var url = apiUrl + "currencies.json";
+
+    console.log('Calling OpenExchangeRates API at: ', url);
+
+    rest.get(url).on("complete", function (result, response) {
+
+      if (response.statusCode == 200){
+        var returns = {
+          currencies: Object.getOwnPropertyNames(result),
+        }
+
+        self.sendResponse(res, 200, returns);
+      }
+
+      if (response.statusCode == 405) {
+        callback('Not Allowed');
+      }
+
+      if (response.statusCode == 502) {
+        callback('API Error');
+      }
+    })
   },
 
   convertAmount: (amount, data) => {

@@ -15,6 +15,10 @@ router.get('/0.1', jsonParser, function(req, res){
     res.end();
 });
 
+router.get("/0.1/currencies", jsonParser, function(req, res){
+    api.getCurrencies(res);
+})
+
 router.post('/0.1/', jsonParser, function(req, res){
     api.ver001(req.body, res);
 });
