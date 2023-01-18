@@ -49,17 +49,27 @@ const GetRate = () => {
 
         // Basically, we're just converting from 1 USD to the selected currencies and then
         // Dividing them so we can get an estimated result
+        // The results will always be ordered, first is the "From" currency and second is the "To" currency
         const fromResult = response.data.results[0].roundedResult;
         const toResult = response.data.results[1].roundedResult;
-        
-        setFrom(currentTarget.from.value)
-        setTo(currentTarget.to.value)
-        setAmount(currentTarget.amount.value);
-        setConvertedAmount(toResult/fromResult * currentTarget.amount.value)
-        setConverted(true)
 
+        // We get the rate of conversion between the two currencies
+        const fromToRate = toResult/fromResult;
+
+        // We finally get the result by multiplying that rate with the amount we wanted to convert
+        const result = fromToRate * currentTarget.amount.value;
+        
+        setFrom(currentTarget.from.value);
+        setTo(currentTarget.to.value);
+        setAmount(currentTarget.amount.value);
+        setConvertedAmount(result);
+        setConverted(true);
     }
 
+    if (loading){
+        return <div><p>Loading currencies...</p></div>
+    }
+    
     return (
         <div>
             <form onSubmit={handleSubmit} >
