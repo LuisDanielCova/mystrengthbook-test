@@ -55,6 +55,58 @@ var self = (module.exports = {
     });
   },
 
+  ver002: (data, res) => {
+    if (data.symbols && typeof data.symbols !== 'string') {
+      self.sendResponse(res, 403, 'Please provide the symbols as a string');
+      return;
+    }
+
+    const symbols = (data.symbols || '').toUpperCase();
+
+    // validate that an amount is provided
+    if (typeof data.amount === 'undefined' || data.amount === '') {
+      self.sendResponse(res, 403, 'Please supply an amount to convert');
+      return;
+    }
+
+    if (typeof data.date !== 'string') {
+      self.sendResponse(res, 403, 'Please provide the date as a string');
+      return;
+    }    
+
+    const dateValidator = /^\d{4}[./-]\d{2}[./-]\d{2}$/;
+    if (!data.date.match(dateValidator)){
+      self.sendResponse(res, 400, 'Please provide a valid date in the format: YYYY-MM-DD');
+      return;
+    }
+
+    const date = data.date;
+
+    // build the API call URL
+    const url = `${apiUrl}historical/${date}.json?&symbols=${symbols}&app_id=${APP_ID}`;
+
+    console.log(`Calling OpenExchangeRates API at: ${url}`);
+
+    rest.get(url).on('complete', (result, response) => {
+      if (response.statusCode == 200) {
+        const returns = {
+          base: data.base,
+          amount: data.amount,
+          results: self.convertAmount(data.amount, result),
+          dated: data.date,
+        };
+
+        self.sendResponse(res, 200, returns);
+      }
+      if (response.statusCode == 401) {
+        callback('Not Authorized');
+      }
+      if (response.statusCode == 502) {
+        callback('API Error');
+      }
+    });
+  },
+
   // Method to get all the currencies supported by OpenExchangeRates
   getCurrencies: (res) => {
     var url = apiUrl + "currencies.json";
